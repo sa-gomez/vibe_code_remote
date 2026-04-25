@@ -1,0 +1,229 @@
+/* palette */
+:root {
+  --bg:        #FAF7F2;
+  --text:      #1C1917;
+  --accent:    #C4704F;
+  --sage:      #6B8F71;
+  --muted:     #9C9489;
+  --rule:      #E8E2D9;
+  --max-w:     720px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0 1.25rem;
+}
+
+/* ── header ── */
+header {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 2rem 0 1.75rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--rule);
+}
+
+.site-name {
+  font-family: 'Lora', serif;
+  font-weight: 500;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+nav a {
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+nav a:hover {
+  color: var(--accent);
+}
+
+/* ── main ── */
+main {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+section {
+  padding: 3.5rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+section:last-child {
+  border-bottom: none;
+}
+
+/* ── intro ── */
+.intro {
+  padding-top: 3.75rem;
+}
+
+.tagline {
+  font-family: 'Lora', serif;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 400;
+  max-width: 540px;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.bio {
+  color: var(--muted);
+  max-width: 520px;
+  font-size: 0.95rem;
+}
+
+/* ── section headings ── */
+h2 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+
+/* ── entry list ── */
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.entry-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.entry-title {
+  font-family: 'Lora', serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+a.entry-link {
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+a.entry-link:hover {
+  color: var(--accent);
+}
+
+.entry-years {
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.entry-role {
+  font-size: 0.85rem;
+  color: var(--sage);
+  margin-bottom: 0.4rem;
+}
+
+.entry-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  max-width: 580px;
+}
+
+/* ── tags ── */
+.tags {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+/* ── footer ── */
+footer {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 2.5rem 0 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+footer p {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+footer a:hover {
+  color: var(--accent);
+}
+
+.footer-year {
+  font-size: 0.8rem;
+}
+
+/* ── mobile ── */
+@media (max-width: 540px) {
+  header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tagline {
+    font-size: 1.25rem;
+  }
+
+  .entry-meta {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

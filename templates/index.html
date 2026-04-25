@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aaron Gomez</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <header>
+    <span class="site-name">Aaron Gomez</span>
+    <nav>
+      <a href="#work">Work</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <section class="intro">
+      <p class="tagline">Engineer who likes building things that are actually useful.</p>
+      <p class="bio">
+        I'm a software engineer based somewhere on earth. I spend most of my time
+        on backend systems, developer tooling, and the occasional side project that
+        gets out of hand. This is a placeholder — update this with something true about you.
+      </p>
+    </section>
+
+    <section id="work">
+      <h2>Work</h2>
+      <div class="entry-list">
+        {% for job in work %}
+        <div class="entry">
+          <div class="entry-meta">
+            <span class="entry-title">{{ job.company }}</span>
+            <span class="entry-years">{{ job.years }}</span>
+          </div>
+          <p class="entry-role">{{ job.role }}</p>
+          <p class="entry-desc">{{ job.description }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+      <div class="entry-list">
+        {% for project in projects %}
+        <div class="entry">
+          <div class="entry-meta">
+            <a class="entry-title entry-link" href="{{ project.url }}" target="_blank" rel="noopener">{{ project.name }}</a>
+            <span class="tags">
+              {% for tag in project.tech %}
+              <span class="tag">{{ tag }}</span>
+              {% endfor %}
+            </span>
+          </div>
+          <p class="entry-desc">{{ project.description }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="contact">
+    <p>
+      Get in touch —
+      <a href="mailto:you@example.com">you@example.com</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/sa-gomez" target="_blank" rel="noopener">GitHub</a>
+    </p>
+    <p class="footer-year">
+      © 2026 &nbsp;·&nbsp;
+      <a href="/match" class="footer-recruiter">Recruiter? Check if I'm a fit →</a>
+    </p>
+  </footer>
+
+</body>
+</html>

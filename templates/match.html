@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Is Aaron a fit? — Match Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <style>
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      padding: 0.85rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    textarea:focus {
+      border-color: var(--muted);
+    }
+    .submit-btn {
+      margin-top: 1rem;
+      padding: 0.55rem 1.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--bg);
+      background: var(--text);
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .submit-btn:hover {
+      background: var(--accent);
+    }
+    .result-block {
+      margin-top: 2.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--rule);
+    }
+    .match-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.7rem;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+    .badge-strong  { background: #d4edda; color: #2d6a4f; }
+    .badge-partial { background: #fff3cd; color: #856404; }
+    .badge-no      { background: #f8d7da; color: #842029; }
+
+    .result-summary {
+      font-family: 'Lora', serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      max-width: 560px;
+      margin-bottom: 2rem;
+    }
+    .result-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 540px) {
+      .result-cols { grid-template-columns: 1fr; }
+    }
+    .result-col h3 {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .result-col ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .result-col ul li {
+      font-size: 0.875rem;
+      color: var(--text);
+      padding-left: 1rem;
+      position: relative;
+    }
+    .result-col ul li::before {
+      position: absolute;
+      left: 0;
+    }
+    .matches li::before { content: "✓"; color: var(--sage); }
+    .gaps li::before    { content: "–"; color: var(--muted); }
+
+    .error-msg {
+      color: #842029;
+      font-size: 0.875rem;
+      margin-top: 0.75rem;
+    }
+    .back-link {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="site-name">Aaron Gomez</span>
+    <nav>
+      <a href="/" class="back-link">← Portfolio</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro" style="padding-bottom: 0;">
+      <p class="tagline">Is Aaron a good fit?</p>
+      <p class="bio">
+        Paste a job description below. This tool compares it against Aaron's full background
+        and gives you a plain-English assessment — no résumé skimming required.
+      </p>
+    </section>
+
+    <section style="border-bottom: none; padding-top: 2.5rem;">
+      <form method="POST">
+        <textarea
+          name="job_description"
+          placeholder="Paste the job description here…"
+        >{{ job_description }}</textarea>
+        {% if error %}
+        <p class="error-msg">{{ error }}</p>
+        {% endif %}
+        <br />
+        <button type="submit" class="submit-btn">Check the fit</button>
+      </form>
+
+      {% if result %}
+      <div class="result-block">
+
+        {% if result.match_level == "Strong Match" %}
+          <span class="match-badge badge-strong">{{ result.match_level }}</span>
+        {% elif result.match_level == "Partial Match" %}
+          <span class="match-badge badge-partial">{{ result.match_level }}</span>
+        {% else %}
+          <span class="match-badge badge-no">{{ result.match_level }}</span>
+        {% endif %}
+
+        <p class="result-summary">{{ result.summary }}</p>
+
+        <div class="result-cols">
+          <div class="result-col">
+            <h3>Matching areas</h3>
+            <ul class="matches">
+              {% for item in result.matching_areas %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="result-col">
+            <h3>Potential gaps</h3>
+            <ul class="gaps">
+              {% for item in result.gaps %}
+              <li>{{ item }}</li>
+              {% endfor %}
+              {% if not result.gaps %}
+              <li style="color: var(--muted); font-style: italic;">None identified</li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer>
+    <p style="font-size: 0.8rem; color: var(--muted);">
+      Results are generated by AI based on Aaron's self-reported background.
+    </p>
+  </footer>
+
+</body>
+</html>
