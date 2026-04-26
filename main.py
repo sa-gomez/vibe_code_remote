@@ -3,8 +3,10 @@ import os
 from pathlib import Path
 
 import anthropic
+import numpy as np
 from dotenv import load_dotenv
 from flask import Flask, render_template, request
+from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -50,6 +52,10 @@ projects = [
 
 BODY_OF_WORK = Path(__file__).parent / "data" / "body_of_work.md"
 body_of_work_text = BODY_OF_WORK.read_text()
+
+_embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+_bow_chunks = [p.strip() for p in body_of_work_text.split("\n\n") if p.strip()]
+_bow_embeddings = _embed_model.encode(_bow_chunks, convert_to_numpy=True)
 
 SYSTEM_PROMPT = f"""You are evaluating whether a software engineer is a good match for a job posting.
 
@@ -124,6 +130,53 @@ def evaluate_match_tfidf(job_description: str) -> dict:
     }
 
 
+def evaluate_match_embeddings(job_description: str) -> dict:
+    jd_embedding = _embed_model.encode([job_description], convert_to_numpy=True)
+
+    # Similarity of each body-of-work chunk against the JD
+    chunk_scores = cosine_similarity(jd_embedding, _bow_embeddings)[0]
+    top_k_idx = np.argsort(chunk_scores)[::-1][:5]
+    top_scores = chunk_scores[top_k_idx]
+    avg_score = float(top_scores.mean())
+
+    # Matching areas: first sentence (or up to 80 chars) of top chunks
+    matching_areas = []
+    for idx in top_k_idx:
+        chunk = _bow_chunks[idx]
+        first_line = chunk.split("\n")[0].strip()
+        matching_areas.append(first_line[:90] if len(first_line) > 90 else first_line)
+
+    # Gaps: JD sentences with lowest max similarity to any chunk
+    jd_sentences = [s.strip() for s in job_description.replace("\n", " ").split(".") if len(s.strip()) > 20]
+    if jd_sentences:
+        jd_sent_embeddings = _embed_model.encode(jd_sentences, convert_to_numpy=True)
+        sent_scores = cosine_similarity(jd_sent_embeddings, _bow_embeddings).max(axis=1)
+        gap_idx = np.argsort(sent_scores)[:6]
+        gaps = [jd_sentences[i][:90] for i in gap_idx if sent_scores[i] < 0.4]
+    else:
+        gaps = []
+
+    if avg_score > 0.45:
+        match_level = "Strong Match"
+    elif avg_score > 0.30:
+        match_level = "Partial Match"
+    else:
+        match_level = "Not a Match"
+
+    summary = (
+        f"Semantic similarity analysis (avg score: {avg_score:.2f}) found strong overlap between "
+        f"the job description and {len(matching_areas)} sections of Aaron's background. "
+        "This method understands synonyms and paraphrasing — 'distributed systems' matches 'microservices'."
+    )
+
+    return {
+        "match_level": match_level,
+        "matching_areas": matching_areas,
+        "gaps": gaps,
+        "summary": summary,
+    }
+
+
 @app.route("/")
 def index():
     return render_template("index.html", work=work, projects=projects)
@@ -147,6 +200,8 @@ def match():
             try:
                 if method == "tfidf":
                     result = evaluate_match_tfidf(job_description)
+                elif method == "embeddings":
+                    result = evaluate_match_embeddings(job_description)
                 else:
                     result = evaluate_match(job_description)
             except Exception as e:

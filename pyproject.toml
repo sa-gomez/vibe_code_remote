@@ -9,4 +9,5 @@ dependencies = [
     "anthropic>=0.40",
     "python-dotenv>=1.2.2",
     "scikit-learn>=1.4",
+    "sentence-transformers>=5.4.1",
 ]

@@ -167,12 +167,16 @@
       <form method="POST">
         <div class="method-toggle">
           <label>
-            <input type="radio" name="method" value="claude" {% if method != "tfidf" %}checked{% endif %} />
+            <input type="radio" name="method" value="claude" {% if method == "claude" or method not in ["tfidf", "embeddings"] %}checked{% endif %} />
             Claude API
           </label>
           <label>
             <input type="radio" name="method" value="tfidf" {% if method == "tfidf" %}checked{% endif %} />
             Keywords (TF-IDF)
+          </label>
+          <label>
+            <input type="radio" name="method" value="embeddings" {% if method == "embeddings" %}checked{% endif %} />
+            Embeddings
           </label>
         </div>
         <textarea
@@ -189,7 +193,7 @@
       {% if result %}
       <div class="result-block">
 
-        <p class="method-label">via {% if method == "tfidf" %}Keywords / TF-IDF{% else %}Claude API{% endif %}</p>
+        <p class="method-label">via {% if method == "tfidf" %}Keywords / TF-IDF{% elif method == "embeddings" %}Embeddings (sentence-transformers){% else %}Claude API{% endif %}</p>
 
         {% if result.match_level == "Strong Match" %}
           <span class="match-badge badge-strong">{{ result.match_level }}</span>
