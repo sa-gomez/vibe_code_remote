@@ -5,6 +5,8 @@ from pathlib import Path
 import anthropic
 from dotenv import load_dotenv
 from flask import Flask, render_template, request
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 load_dotenv()
 
@@ -86,6 +88,42 @@ def evaluate_match(job_description: str) -> dict:
     return json.loads(response.content[0].text)
 
 
+def evaluate_match_tfidf(job_description: str) -> dict:
+    vectorizer = TfidfVectorizer(stop_words="english", max_features=500)
+    matrix = vectorizer.fit_transform([body_of_work_text, job_description])
+    score = float(cosine_similarity(matrix[0], matrix[1])[0][0])
+
+    feature_names = vectorizer.get_feature_names_out()
+    bow_weights = matrix[0].toarray()[0]
+    jd_weights = matrix[1].toarray()[0]
+
+    jd_terms = {feature_names[i] for i, w in enumerate(jd_weights) if w > 0}
+    bow_terms = {feature_names[i] for i, w in enumerate(bow_weights) if w > 0}
+
+    matched = sorted(jd_terms & bow_terms)[:12]
+    gaps = sorted(jd_terms - bow_terms)[:12]
+
+    if score > 0.15:
+        match_level = "Strong Match"
+    elif score > 0.06:
+        match_level = "Partial Match"
+    else:
+        match_level = "Not a Match"
+
+    summary = (
+        f"Keyword analysis (cosine similarity: {score:.2f}) found {len(matched)} term(s) "
+        f"from the job description in Aaron's background and {len(gaps)} that are absent. "
+        "Note: this method is purely lexical — synonyms and paraphrasing are not detected."
+    )
+
+    return {
+        "match_level": match_level,
+        "matching_areas": matched,
+        "gaps": gaps,
+        "summary": summary,
+    }
+
+
 @app.route("/")
 def index():
     return render_template("index.html", work=work, projects=projects)
@@ -96,16 +134,21 @@ def match():
     result = None
     error = None
     job_description = ""
+    method = "claude"
 
     if request.method == "POST":
         job_description = request.form.get("job_description", "").strip()
+        method = request.form.get("method", "claude")
         if not job_description:
             error = "Please paste a job description."
-        elif not os.environ.get("ANTHROPIC_API_KEY"):
+        elif method == "claude" and not os.environ.get("ANTHROPIC_API_KEY"):
             error = "ANTHROPIC_API_KEY environment variable is not set."
         else:
             try:
-                result = evaluate_match(job_description)
+                if method == "tfidf":
+                    result = evaluate_match_tfidf(job_description)
+                else:
+                    result = evaluate_match(job_description)
             except Exception as e:
                 error = f"Something went wrong: {e}"
 
@@ -114,6 +157,7 @@ def match():
         result=result,
         error=error,
         job_description=job_description,
+        method=method,
     )
 
 

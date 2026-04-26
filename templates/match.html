@@ -106,6 +106,31 @@
     .matches li::before { content: "✓"; color: var(--sage); }
     .gaps li::before    { content: "–"; color: var(--muted); }
 
+    .method-toggle {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .method-toggle label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .method-toggle input[type="radio"] {
+      accent-color: var(--text);
+    }
+    .method-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
     .error-msg {
       color: #842029;
       font-size: 0.875rem;
@@ -140,6 +165,16 @@
 
     <section style="border-bottom: none; padding-top: 2.5rem;">
       <form method="POST">
+        <div class="method-toggle">
+          <label>
+            <input type="radio" name="method" value="claude" {% if method != "tfidf" %}checked{% endif %} />
+            Claude API
+          </label>
+          <label>
+            <input type="radio" name="method" value="tfidf" {% if method == "tfidf" %}checked{% endif %} />
+            Keywords (TF-IDF)
+          </label>
+        </div>
         <textarea
           name="job_description"
           placeholder="Paste the job description here…"
@@ -153,6 +188,8 @@
 
       {% if result %}
       <div class="result-block">
+
+        <p class="method-label">via {% if method == "tfidf" %}Keywords / TF-IDF{% else %}Claude API{% endif %}</p>
 
         {% if result.match_level == "Strong Match" %}
           <span class="match-badge badge-strong">{{ result.match_level }}</span>
